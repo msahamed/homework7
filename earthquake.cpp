@@ -8,143 +8,100 @@
 
 
 //Libraries
-#include <iostream>
 #include <string>
 #include <sstream>
-#include <stdlib.h> 
-#include <fstream>
-#include <iomanip>
-#include <ctype.h>
-
 #include "earthquake.h"
+#include "station.h"
 
 
-string earthquke::uppercase (string s) {
 
-    string result = s;
-    for (int i=0; i < (int)result.size(); i++)
-        result[i] = toupper(result[i]);
-    return result;
+bool earthquake::IsDate(string date1, string& day1, string& monthNmae, string& year1) {
 
-}
+    for (int i = 0 ; i< 4; i++) year1 += date1[i+6];
 
-networkCode earthquke::str2Ncode(string NCode) {
+    if (!isdigit(date1[3]) && !isdigit(date1[4]))  return false;
+    
+    for (int i = 0 ; i< 2; i++) day1 += date1[i+3];
 
-    if (NCode == uppercase("CI")) return CI;   
-    else if (NCode == uppercase("CE")) return CE;
-    else if (NCode == uppercase("FA")) return FA;
-    else if (NCode == uppercase("NP")) return NP;
-    else if (NCode == uppercase("WR")) return WR;
+    string mm ;
+    for (int i = 0; i< 2; i++) mm += date1[i];
+    int number;
+    std::istringstream(mm) >> number;
 
-}
-
-
-bool earthquke::IsNCode(string NCode) {
-
-    networkCode NCode1 = str2Ncode(NCode);
-
-    switch (NCode1) {
-        case CI :
-            { return true; break;}
-        case CE :
-            { return true; break;}
-        case FA :
-            { return true; break;}
-        case NP : 
-            { return true; break;}
-        case WR :
-            { return true; break;}
-        default :
-             return false;
-    }
-
-}
-
-
-// Check the station name
-bool earthquke::IsStation(string stationName) {
-     
-    bool rightStation = false;
-    if (stationName.length() == 3 || stationName.length() == 5) {
-         
-        if (stationName.length() == 3) {
-            for (int i =0; i< 3; i++){
-                if (isalpha(stationName[i]) && isupper(stationName[i])) rightStation = true;
-                else return false;
-            }
-        }
-        else if (stationName.length() == 5) {
-            for (int i =0; i< 5; i++){
-                if (isdigit(stationName[i])) rightStation = true;
-                else return false;
-            }
-        }
-    }
+    if      ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)1))  monthNmae = "January";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)2))  monthNmae = "February";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)3))  monthNmae = "March";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)4))  monthNmae = "April";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)5))  monthNmae = "May";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)6))  monthNmae = "June";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)7))  monthNmae = "July";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)8))  monthNmae = "August";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)9))  monthNmae = "September";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)10)) monthNmae = "October";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)11)) monthNmae = "November";
+    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)12)) monthNmae = "December";
     else return false;
-    return rightStation;
-}
 
-bandType earthquke::str2bandName(string bandName) {
-
-    if (bandName == uppercase("Long-Period")) return LongPeriod;   
-    else if (bandName == uppercase("Short-Period")) return ShortPeriod;
-    else if (bandName == uppercase("Broadband")) return Broadband;
-}
-
-// Check bancd name 
-bool earthquke::IsBand(string bandName, string& bandInitial) {
-    bool band = false;
-    bandType bandName1 = str2bandName(uppercase(bandName));
-
-    switch (bandName1) {
-        case LongPeriod : { band = true ; bandInitial = "L"; return true; }
-        case ShortPeriod : { band = true ; bandInitial = "B"; return true; }
-        case Broadband : { band = true ; bandInitial = "H"; return true; }
-    }
-    return band;
-}
-
-
-InstrumentType earthquke::str2InstrumentType (string instrumentName) {
-
-    if (instrumentName == uppercase("High-Gain")) return HighGain;   
-    else if (instrumentName == uppercase("Low-Gain")) return LowGain;
-    else if (instrumentName == uppercase("Accelerometer")) return Accelerometer;
+    return true;
 
 }
 
-// Check instrument type and name 
-bool earthquke::IsInstrument(string instrumentName, string& instInitial) {
 
-    bool isint = false;
-    InstrumentType instrumentName1 = str2InstrumentType(uppercase(instrumentName));
+// Check if the time is not formated and timeZone is wrong. 
+bool earthquake::IsTime (string time, string timeZone) {
     
-    switch (instrumentName1) {
-        case HighGain : { isint = true ; instInitial= "H"; return true; }
-        case LowGain : { isint = true ; instInitial= "L"; return true; }
-        case Accelerometer : { isint = true ; instInitial= "N"; return true; }
-    }
-    return isint;
-}
-
-
-// Check the orientation of signal
-bool earthquke::IsOrientation(string orName) {
+    if (timeZone.length() != 3) return false;
     
-    bool isAlphabatic = false;
-    bool isNumeric = false;
-    string orientation = "ENZ123";
-     
-    for (int unsigned i = 0 ; i < orName.length(); i++){
-        if (orName[i] == orientation[0]) isAlphabatic = true;
-        else if (orName[i] == orientation[1]) isAlphabatic = true;
-        else if (orName[i] == orientation[2]) isAlphabatic = true;
-        else if (orName[i] == orientation[3]) isNumeric = true;
-        else if (orName[i] == orientation[4]) isNumeric = true;
-        else if (orName[i] == orientation[5]) isNumeric = true;
-        else return false;
+    string hh, mm, ss;
+    for (int i = 0; i< 2; i++) {
+        hh += time[i];
+        mm += time[i+3];
+        ss += time[i+6];
     }
 
-    if ((isAlphabatic) && (isNumeric)) return false;
-    else return true;
+    if (isdigit(hh[0]) == 0 || isdigit(hh[1]) == 0 ) return false;
+    if (isdigit(mm[0]) == 0 || isdigit(mm[1]) == 0 ) return false;
+    if (isdigit(ss[0]) == 0 || isdigit(ss[1]) == 0 ) return false;
+
+    return true;
+
 }
+
+magnitudeType earthquake::strToMagnitude(string magType) {
+
+    if (magType == "ML") return ML;   
+    else if (magType == "MS") return Ms;
+    else if (magType == "MB") return Mb;
+    else if (magType == "MW") return Mw;
+
+}
+
+// Check magnitude type AND magnitude value
+bool earthquake::IsMagnitude(string& magType, string magnitude) {
+
+   int number;
+   bool mag;
+   istringstream(magnitude) >> number;
+   if (number < 0) return false;
+
+    magnitudeType mag1;
+    station stn;
+    mag1 = strToMagnitude(stn.uppercase(magType));
+
+    switch (mag1) {
+        case ML :
+            { mag = true; magType = "ML" ; break;}
+        case Ms :
+            { mag = true; magType = "Ms" ;  break;}
+        case Mb :
+            { mag = true; magType = "Mb" ;  break;}
+        case Mw : 
+            { mag = true; magType = "Mw" ; break;}
+        default :
+            return false;
+    }
+
+    return mag;
+
+}
+

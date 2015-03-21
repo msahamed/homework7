@@ -17,15 +17,10 @@
 #include <iomanip>
 #include <ctype.h>
 
+#include "station.h"
 #include "earthquake.h"
 
 using namespace std;
-
-enum months { January = 1, February, March, April, May, June , July, 
-            August, September, October, November, December };
-
-enum magnitudeType { ML, Ms, Mb, Mw };
-
 
 struct header {
 
@@ -55,107 +50,6 @@ struct signalInfo {
     string instInitial;
 
 };
-
-
-string uppercase (string s) {
-
-    string result = s;
-    for (int i=0; i < (int)result.size(); i++)
-        result[i] = toupper(result[i]);
-    return result;
-
-}
-
-
-bool IsDate(string date1, string& day1, string& monthNmae, string& year1) {
-
-    for (int i = 0 ; i< 4; i++) year1 += date1[i+6];
-
-    if (!isdigit(date1[3]) && !isdigit(date1[4]))  return false;
-    
-    for (int i = 0 ; i< 2; i++) day1 += date1[i+3];
-
-    string mm ;
-    for (int i = 0; i< 2; i++) mm += date1[i];
-    int number;
-    std::istringstream(mm) >> number;
-
-    if      ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)1))  monthNmae = "January";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)2))  monthNmae = "February";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)3))  monthNmae = "March";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)4))  monthNmae = "April";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)5))  monthNmae = "May";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)6))  monthNmae = "June";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)7))  monthNmae = "July";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)8))  monthNmae = "August";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)9))  monthNmae = "September";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)10)) monthNmae = "October";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)11)) monthNmae = "November";
-    else if ((isdigit(date1[0]) &&  (isdigit(date1[1])) && number == (months)12)) monthNmae = "December";
-    else return false;
-
-    return true;
-
-}
-
-
-// Check if the time is not formated and timeZone is wrong. 
-bool IsTime (string time, string timeZone) {
-    
-    if (timeZone.length() != 3) return false;
-    
-    string hh, mm, ss;
-    for (int i = 0; i< 2; i++) {
-        hh += time[i];
-        mm += time[i+3];
-        ss += time[i+6];
-    }
-
-    if (isdigit(hh[0]) == 0 || isdigit(hh[1]) == 0 ) return false;
-    if (isdigit(mm[0]) == 0 || isdigit(mm[1]) == 0 ) return false;
-    if (isdigit(ss[0]) == 0 || isdigit(ss[1]) == 0 ) return false;
-
-    return true;
-
-}
-
-magnitudeType strToMagnitude(string magType) {
-
-    if (magType == "ML") return ML;   
-    else if (magType == "MS") return Ms;
-    else if (magType == "MB") return Mb;
-    else if (magType == "MW") return Mw;
-
-}
-
-// Check magnitude type AND magnitude value
-bool IsMagnitude(string& magType, string magnitude) {
-
-   int number;
-   bool mag;
-   istringstream(magnitude) >> number;
-   if (number < 0) return false;
-
-    magnitudeType mag1;
-    mag1 = strToMagnitude(uppercase(magType));
-
-    switch (mag1) {
-        case ML :
-            { mag = true; magType = "ML" ; break;}
-        case Ms :
-            { mag = true; magType = "Ms" ;  break;}
-        case Mb :
-            { mag = true; magType = "Mb" ;  break;}
-        case Mw : 
-            { mag = true; magType = "Mw" ; break;}
-        default :
-            return false;
-    }
-
-    return mag;
-
-}
-
 
 
 // Open Input File and check
@@ -260,7 +154,8 @@ int main() {
     cout << "starts reading ...." <<endl;
     outputErrorFile << "starts reading ...." <<endl;
     outputErrorFile.close();
-    earthquke eq;
+    station stn;
+    earthquake eq;
     string array[300];
     for (int i =0; i< 300; i++) array[i] = "E" ;
 
@@ -308,13 +203,13 @@ int main() {
     bool a, b, c, d, e, h1, h2, h3; 
 
     // checking header information
-    if (IsDate(head.date, head.day, monthNmae, head.year)) h1 = true;
+    if (eq.IsDate(head.date, head.day, monthNmae, head.year)) h1 = true;
     else h1 = false;
 
-    if (IsMagnitude(head.magType, head.magnitude)) h2 = true;
+    if (eq.IsMagnitude(head.magType, head.magnitude)) h2 = true;
     else h2 = false;
 
-    if (IsTime (head.time, head.timeZone)) h3 = true;
+    if (eq.IsTime (head.time, head.timeZone)) h3 = true;
     else h3 = false;
 
     if (h1 && h2 && h3) {
@@ -352,33 +247,33 @@ int main() {
         number >> signal.instrumentName;
         number >> signal.orName;
 
-        if (eq.IsNCode(signal.NCode)) {
-            signal.NCode = uppercase(signal.NCode);
+        if (stn.IsNCode(signal.NCode)) {
+            signal.NCode = stn.uppercase(signal.NCode);
             a = true;
         }
         else a = false;
 
 
-        if (eq.IsStation(signal.stationName)) {
-            signal.stationName = uppercase(signal.stationName);
+        if (stn.IsStation(signal.stationName)) {
+            signal.stationName = stn.uppercase(signal.stationName);
             b = true;
         }
         else b = false;
 
-        if (eq.IsBand(signal.bandName, signal.bandInitial)) {
+        if (stn.IsBand(signal.bandName, signal.bandInitial)) {
             signal.bandName = signal.bandInitial;
             c = true;
         }
         else c = false;
 
-        if (eq.IsInstrument(signal.instrumentName , signal.instInitial)) {
+        if (stn.IsInstrument(signal.instrumentName , signal.instInitial)) {
             signal.instrumentName = signal.instInitial;
             d = true;
         }
         else d = false;
 
-        if (eq.IsOrientation(signal.orName)) {
-            signal.orName = uppercase(signal.orName);
+        if (stn.IsOrientation(signal.orName)) {
+            signal.orName = stn.uppercase(signal.orName);
             e = true;
         }
         else e = false;
@@ -389,7 +284,7 @@ int main() {
             for (int i = 0 ; i < or_1.length(); i++) {
 
                 array[totalSignal] = head.EQID + "." + signal.NCode + "." + signal.stationName + "." 
-                                     + uppercase(signal.bandName) + uppercase(signal.instrumentName) + or_1[i] ;
+                                     + stn.uppercase(signal.bandName) + stn.uppercase(signal.instrumentName) + or_1[i] ;
                 totalSignal += 1;
 
             }
