@@ -23,6 +23,9 @@ bool earthquake::IsDate(string date1, string& day1, string& monthNmae, string& y
     
     for (int i = 0 ; i< 2; i++) day1 += date1[i+3];
 
+    int dd ; std::istringstream(day1) >> dd;
+    if (dd<1 || dd >31) return false;
+
     string mm ;
     for (int i = 0; i< 2; i++) mm += date1[i];
     int number;
@@ -52,16 +55,27 @@ bool earthquake::IsTime (string time, string timeZone) {
     
     if (timeZone.length() != 3) return false;
     
-    string hh, mm, ss;
+    int hh, mm, ss;
+    string a, b ,c;
+
     for (int i = 0; i< 2; i++) {
-        hh += time[i];
-        mm += time[i+3];
-        ss += time[i+6];
+        a += time[i];
+        b += time[i+3];
+        c += time[i+6];
     }
 
-    if (isdigit(hh[0]) == 0 || isdigit(hh[1]) == 0 ) return false;
-    if (isdigit(mm[0]) == 0 || isdigit(mm[1]) == 0 ) return false;
-    if (isdigit(ss[0]) == 0 || isdigit(ss[1]) == 0 ) return false;
+    if (isdigit(a[0]) == 0 || isdigit(a[1]) == 0 ) return false;
+    if (isdigit(b[0]) == 0 || isdigit(b[1]) == 0 ) return false;
+    if (isdigit(c[0]) == 0 || isdigit(c[1]) == 0 ) return false;
+
+    std::istringstream(a) >> hh;
+    if (hh < 0 || hh > 24) return false;
+
+    std::istringstream(b) >> mm;
+    if (mm < 0 || mm > 59) return false;
+
+    std::istringstream(c) >> ss;
+    if (ss < 0 || ss > 59.999) return false;
 
     return true;
 
