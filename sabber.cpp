@@ -22,35 +22,6 @@
 
 using namespace std;
 
-struct header {
-
-    string EQID;
-    string date;
-    string day;
-    string year;
-    string time;
-    string timeZone;
-    string earthquakeName;
-    string lat;
-    string lon;
-    string magType;
-    string magnitude;
-    string Enumber;
-
-};
-
-struct signalInfo {
-
-    string NCode;
-    string stationName;
-    string bandName;
-    string instrumentName;
-    string orName;
-    string bandInitial;
-    string instInitial;
-
-};
-
 
 // Open Input File and check
 void open_input(ifstream& inputFile, string inputFileName) {
@@ -173,27 +144,27 @@ int main() {
     ifstream inputFile;
     open_input(inputFile, inputFileName);
     
-    header head;
+    //header head;
     getline(inputFile, line);
     stringstream headInfo1 (line);
-    headInfo1 >> head.EQID;
+    headInfo1 >> eq.EQID;
     
     getline(inputFile, line);
     stringstream headInfo2 (line);
-    headInfo2 >> head.date;
-    headInfo2 >> head.time;
-    headInfo2 >> head.timeZone;
+    headInfo2 >> eq.date;
+    headInfo2 >> eq.time;
+    headInfo2 >> eq.timeZone;
 
     getline(inputFile, line);
-    head.earthquakeName = line;
+    eq.earthquakeName = line;
 
     getline(inputFile, line);
     stringstream headInfo4 (line);
-    headInfo4 >> head.lat;
-    headInfo4 >> head.lon;
-    headInfo4 >> head.Enumber;
-    headInfo4 >> head.magType;
-    headInfo4 >> head.magnitude;
+    headInfo4 >> eq.lat;
+    headInfo4 >> eq.lon;
+    headInfo4 >> eq.Enumber;
+    headInfo4 >> eq.magType;
+    headInfo4 >> eq.magnitude;
 
     string monthNmae;
     string day, year;
@@ -203,13 +174,13 @@ int main() {
     bool a, b, c, d, e, h1, h2, h3; 
 
     // checking header information
-    if (eq.IsDate(head.date, head.day, monthNmae, head.year)) h1 = true;
+    if (eq.IsDate(eq.date, eq.day, monthNmae, eq.year)) h1 = true;
     else h1 = false;
 
-    if (eq.IsMagnitude(head.magType, head.magnitude)) h2 = true;
+    if (eq.IsMagnitude(eq.magType, eq.magnitude)) h2 = true;
     else h2 = false;
 
-    if (eq.IsTime (head.time, head.timeZone)) h3 = true;
+    if (eq.IsTime (eq.time, eq.timeZone)) h3 = true;
     else h3 = false;
 
     if (h1 && h2 && h3) {
@@ -218,9 +189,9 @@ int main() {
         outputErrorFile << "header read correctly "<< endl;
         outputErrorFile.close();
 
-        printHeader (EntryNumber, head.EQID, head.day, monthNmae, head.year, head.time,
-                    head.timeZone, head.earthquakeName, head.lat, head.lon, 
-                    head.magType, head.magnitude, head.Enumber);
+        printHeader (EntryNumber, eq.EQID, eq.day, monthNmae, eq.year, eq.time,
+                    eq.timeZone, eq.earthquakeName, eq.lat, eq.lon, 
+                    eq.magType, eq.magnitude, eq.Enumber);
     }
     else {
 
@@ -235,56 +206,55 @@ int main() {
     }
 
     // if header information is correct following code will be executed
-    signalInfo signal;
     EntryNumber = 1;
     while (getline(inputFile, line) && !line.empty()) {
 
         //getline(inputFile, line);
         istringstream number (line);
-        number >> signal.NCode;
-        number >> signal.stationName;
-        number >> signal.bandName;
-        number >> signal.instrumentName;
-        number >> signal.orName;
+        number >> stn.NCode;
+        number >> stn.stationName;
+        number >> stn.bandName;
+        number >> stn.instrumentName;
+        number >> stn.orName;
 
-        if (stn.IsNCode(signal.NCode)) {
-            signal.NCode = stn.uppercase(signal.NCode);
+        if (stn.IsNCode(stn.NCode)) {
+            stn.NCode = stn.uppercase(stn.NCode);
             a = true;
         }
         else a = false;
 
 
-        if (stn.IsStation(signal.stationName)) {
-            signal.stationName = stn.uppercase(signal.stationName);
+        if (stn.IsStation(stn.stationName)) {
+            stn.stationName = stn.uppercase(stn.stationName);
             b = true;
         }
         else b = false;
 
-        if (stn.IsBand(signal.bandName, signal.bandInitial)) {
-            signal.bandName = signal.bandInitial;
+        if (stn.IsBand(stn.bandName, stn.bandInitial)) {
+            stn.bandName = stn.bandInitial;
             c = true;
         }
         else c = false;
 
-        if (stn.IsInstrument(signal.instrumentName , signal.instInitial)) {
-            signal.instrumentName = signal.instInitial;
+        if (stn.IsInstrument(stn.instrumentName , stn.instInitial)) {
+            stn.instrumentName = stn.instInitial;
             d = true;
         }
         else d = false;
 
-        if (stn.IsOrientation(signal.orName)) {
-            signal.orName = stn.uppercase(signal.orName);
+        if (stn.IsOrientation(stn.orName)) {
+            stn.orName = stn.uppercase(stn.orName);
             e = true;
         }
         else e = false;
         
         if ((a) && (b) && (c) && (d) && (e)) {
            
-            string or_1 = signal.orName; 
+            string or_1 = stn.orName; 
             for (int i = 0 ; i < or_1.length(); i++) {
 
-                array[totalSignal] = head.EQID + "." + signal.NCode + "." + signal.stationName + "." 
-                                     + stn.uppercase(signal.bandName) + stn.uppercase(signal.instrumentName) + or_1[i] ;
+                array[totalSignal] = eq.EQID + "." + stn.NCode + "." + stn.stationName + "." 
+                                     + stn.uppercase(stn.bandName) + stn.uppercase(stn.instrumentName) + or_1[i] ;
                 totalSignal += 1;
 
             }

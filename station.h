@@ -21,6 +21,14 @@ class station {
     
     public :
 
+        string NCode;
+        string stationName;
+        string bandName;
+        string instrumentName;
+        string orName;
+        string bandInitial;
+        string instInitial;
+
     	bool IsStation(string stationName);
     	bool IsNCode(string NCode);
     	bool IsBand(string bandName, string& bandInitial);
