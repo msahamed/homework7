@@ -29,18 +29,17 @@ class station {
         string bandInitial;
         string instInitial;
 
-    	bool IsStation(string stationName);
-    	bool IsNCode(string NCode);
-    	bool IsBand(string bandName, string& bandInitial);
-    	bool IsInstrument(string instrumentName, string& instInitial);
-    	bool IsOrientation(string orName);
+        bool IsStation(string stationName);
+        bool IsNCode(string NCode);
+        bool IsBand(string bandName, string& bandInitial);
+        bool IsInstrument(string instrumentName, string& instInitial);
+        bool IsOrientation(string orName);
         string uppercase (string s);
 
     private :
-    	networkCode str2Ncode(string NCode);
-    	bandType str2bandName(string bandName);
-    	InstrumentType str2InstrumentType (string instrumentName);
-    	
+        networkCode str2Ncode(string NCode);
+        bandType str2bandName(string bandName);
+        InstrumentType str2InstrumentType (string instrumentName);
 
 
 };

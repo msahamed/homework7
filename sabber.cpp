@@ -19,102 +19,12 @@
 
 #include "station.h"
 #include "earthquake.h"
+#include "inputoutput.h"
 
 using namespace std;
 
 
-// Open Input File and check
-void open_input(ifstream& inputFile, string inputFileName) {
 
-   inputFile.open(inputFileName.c_str());
-
-    if (inputFile.fail()) {
-        cout << "Error reading the file  " << inputFileName << endl;
-        exit(EXIT_FAILURE);
-    }
-}
-
-
-// Print the header information
-void printHeader (int EntryNumber, string EQID, string day, string monthNmae, string year,
-                  string time1,string timeZone, string earthquakeName, string lat, string lon, 
-                  string magType, string magnitude, string Enumber) {
-
-    ofstream outputFile;
-    string outputFileName = "sabber.out" ;
-    if (EntryNumber == 0)
-       outputFile.open(outputFileName.c_str()); 
-    else
-       outputFile.open(outputFileName.c_str(), ofstream::out | ofstream::app);
-
-       outputFile << "# " << day << " " << monthNmae << " " << year << "  "<< time1 << " " 
-                  << timeZone << " " << magType << "  " << magnitude << " " << earthquakeName 
-                  << " [" <<EQID << "] " << " (" << lat <<" , " <<lon << " " << Enumber << ")" << endl;
-}
-
-// Print to File 
-void printToFile(string array[300], int totalSignal) {
-    
-    ofstream outputFile;
-    string outputFileName = "sabber.out" ;
-    
-    outputFile.open(outputFileName.c_str(), ofstream::out | ofstream::app);
-
-    outputFile << totalSignal;
-    outputFile << endl;
-
-    for (int unsigned i = 0 ; i < 300; i++) { 
-        if (array[i].length() > 1) outputFile << array[i] << endl;;
-
-    }
-}
-
-// Print error to log file 
-void printError(int EntryNUmber, int validEntries, int invalidEntries, int totalSignal, 
-                bool a, bool b, bool c, bool d, bool e, bool h1, bool h2, bool h3) {
-
-    ofstream outputErrorFile;
-    string outputFileName = "sabber.log" ;
-    if (EntryNUmber > 0)
-       outputErrorFile.open(outputFileName.c_str(), ofstream::out | ofstream::app);
-    else
-       outputErrorFile.open(outputFileName.c_str()); 
-
-    
-    if (h1 == false) {
-        outputErrorFile << "Error # Date format wrong !" << endl;
-        cout << "Error # Date format wrong !" << endl;
-    }
-    else if (h2 == false){
-        outputErrorFile << "Error # Either Magnitude_type or Magnitude is wrong !" << endl;
-        cout << "Error # Either Magnitude_type or Magnitude is wrong !" << endl;
-    }
-    else if (h3 == false) {
-        outputErrorFile << "Error # Either time format or time zone is wrong !" << endl;
-        cout << "Error # Either time format or time zone is wrong !" << endl;
-    }
-    else if (a == false) {
-        outputErrorFile << "Entry # " << EntryNUmber << " Invalid Network" << endl;
-        cout << "Entry # " << EntryNUmber << " Invalid Network" << endl;
-    }
-    else if (b == false) {
-        outputErrorFile << "Entry # " << EntryNUmber << " Invalid Station" << endl;
-        cout << "Entry # " << EntryNUmber << " Invalid Station" << endl;
-    }
-    else if (c == false) {
-        outputErrorFile << "Entry # " << EntryNUmber << " Invalid Band type" << endl;
-        cout << "Entry # " << EntryNUmber << " Invalid Band type" << endl;
-    }
-    else if (d == false) {
-        outputErrorFile << "Entry # " << EntryNUmber << " Invalid Instrument" << endl;
-        cout << "Entry # " << EntryNUmber << " Invalid Instrument" << endl;
-    }
-    else if (e == false) {
-        outputErrorFile << "Entry # " << EntryNUmber << " Invalid Orientation" << endl;
-        cout << "Entry # " << EntryNUmber << " Invalid Orientation" << endl;
-    }
-
-}
 
 // Main function 
 int main() {
@@ -127,6 +37,7 @@ int main() {
     outputErrorFile.close();
     station stn;
     earthquake eq;
+    inputoutput io;
     string array[300];
     for (int i =0; i< 300; i++) array[i] = "E" ;
 
@@ -142,9 +53,9 @@ int main() {
 
     cin >> inputFileName ;
     ifstream inputFile;
-    open_input(inputFile, inputFileName);
+    io.open_input(inputFile, inputFileName);
     
-    //header head;
+    // header information reading
     getline(inputFile, line);
     stringstream headInfo1 (line);
     headInfo1 >> eq.EQID;
@@ -171,7 +82,7 @@ int main() {
     int validEntries = 0;
     int invalidEntries = 0;
     int totalSignal = 0;
-    bool a, b, c, d, e, h1, h2, h3; 
+    bool a = true, b = true, c = true, d = true, e = true, h1, h2, h3; 
 
     // checking header information
     if (eq.IsDate(eq.date, eq.day, monthNmae, eq.year)) h1 = true;
@@ -189,7 +100,7 @@ int main() {
         outputErrorFile << "header read correctly "<< endl;
         outputErrorFile.close();
 
-        printHeader (EntryNumber, eq.EQID, eq.day, monthNmae, eq.year, eq.time,
+        io.printHeader (EntryNumber, eq.EQID, eq.day, monthNmae, eq.year, eq.time,
                     eq.timeZone, eq.earthquakeName, eq.lat, eq.lon, 
                     eq.magType, eq.magnitude, eq.Enumber);
     }
@@ -199,7 +110,8 @@ int main() {
         outputErrorFile << "header infromation in not correct "<< endl;
         outputErrorFile.close();
 
-        printError(EntryNumber, validEntries, invalidEntries, totalSignal, a, b, c, d, e, h1, h2, h3);
+        io.printError(EntryNumber, validEntries, invalidEntries, totalSignal, 
+                      a, b, c, d, e, h1, h2, h3);
 
         exit(EXIT_FAILURE);
         
@@ -251,7 +163,7 @@ int main() {
         if ((a) && (b) && (c) && (d) && (e)) {
            
             string or_1 = stn.orName; 
-            for (int i = 0 ; i < or_1.length(); i++) {
+            for (unsigned int i = 0 ; i < or_1.length(); i++) {
 
                 array[totalSignal] = eq.EQID + "." + stn.NCode + "." + stn.stationName + "." 
                                      + stn.uppercase(stn.bandName) + stn.uppercase(stn.instrumentName) + or_1[i] ;
@@ -262,7 +174,7 @@ int main() {
            validEntries ++;
         }
         else {
-            printError(EntryNumber, validEntries, invalidEntries, totalSignal, 
+            io.printError(EntryNumber, validEntries, invalidEntries, totalSignal, 
             a, b, c, d, e, h1, h2, h3);
             invalidEntries ++;
         }
@@ -272,7 +184,7 @@ int main() {
 
     }
     
-    printToFile(array, totalSignal);
+    io.printToFile(array, totalSignal);
 
     outputErrorFile.open(outputFileName.c_str(), ofstream::out | ofstream::app);
     outputErrorFile << "validEntries = "   << validEntries   << endl;
